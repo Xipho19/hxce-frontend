@@ -1,0 +1,133 @@
+@use "../../assets/scss/base";
+@use "../../assets/scss/variables";
+
+.wangeditor-container {
+    border: 1px solid variables.$bc-5;
+    min-width: 365px;
+    max-width: 100%;
+    margin-bottom: 15px;
+}
+
+.expand-container {
+    width: 970px;
+    margin: 20px;
+    display: flex;
+    justify-content: space-between;
+
+    .daily-report-content {
+        line-height: 1.7;
+        width: 720px;
+        flex-grow: 0;
+        flex-shrink: 0;
+        border: 1px solid variables.$bc-3;
+        background-color: variables.$bgc-11;
+        padding: 0 20px;
+        border-radius: 3px;
+    }
+
+    .recipient-container {
+        width: 230px;
+        margin: 0px 25px;
+
+        .separator {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: variables.$fc-2;
+            margin: 0 0 20px 0;
+            display: flex;
+            border-bottom: solid 2px variables.$bc-25;
+
+            span {
+                background-color: variables.$bgc-39;
+                border-top: solid 2px variables.$bc-25;
+                border-top-left-radius: 3px;
+                border-top-right-radius: 3px;
+                color: #fff;
+                padding: 10px 16px 10px 15px;
+                display: flex;
+
+                .icon {
+                    margin-right: 5px;
+                    margin-top: 2px;
+                }
+            }
+
+        }
+
+        .recipient-list {
+            padding: 0;
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            overflow: hidden;
+
+            .recipient-list-item {
+                margin-right: 12px;
+                margin-top: 15px;
+
+                &:first-child {
+                    margin-top: 0;
+                }
+            }
+
+            .user {
+                display: flex;
+                font-size: 12px;
+                color: variables.$fc-2;
+
+                img {
+                    background-color: variables.$bgc-29;
+                    padding: 10px;
+                    display: block;
+                    width: 55px;
+                    height: 55px;
+                    margin-bottom: 5px;
+                    border-radius: 3px;
+                }
+
+                .user-info {
+                    display: block;
+                    margin-left: 10px;
+
+                    .name {
+                        font-size: 14px;
+                        font-weight: bold;
+                    }
+
+                    .deptName {
+                        margin-top: 6px;
+                        color: variables.$fc-3;
+                        display: flex;
+
+                        span {
+                            font-size: 11px;
+                            margin-left: 5px;
+                        }
+
+                        .icon-svg {
+                            margin-top: 1px;
+                        }
+
+                    }
+
+                    .jobName {
+                        margin-top: 6px;
+                        color: variables.$fc-3;
+                        display: flex;
+
+                        span {
+                            font-size: 11px;
+                            margin-left: 5px;
+                        }
+
+                        .icon-svg {
+                            margin-top: 0px;
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}

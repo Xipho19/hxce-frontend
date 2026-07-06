@@ -1,0 +1,66 @@
+@use "../assets/scss/base";
+@use "../assets/scss/variables";
+.home{
+    display: flex;
+    justify-content: center;
+    padding-top: 160px;
+    .left{
+        margin-right: 70px;
+        h2{
+            font-size: 34px;
+            color: variables.$fc-34;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-top: 15px;
+        }
+        .desc{
+            border-left: solid 5px variables.$bc-24;
+            padding-left: 15px;
+            p{
+                font-size: 24px;
+                font-weight: bold;
+                color: variables.$fc-35;
+                letter-spacing: 1px;
+            }
+        }
+        .bottom{
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            .remark-container{
+                .ball{
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 40px;
+                    font-size: 24px;
+                    text-align: center;
+                    line-height: 80px;
+                    color: #fff;
+                    font-weight: bold;
+                }
+                .blue{
+                    background-color: variables.$bgc-32;
+                }
+                .red{
+                    background-color: variables.$bgc-33;
+                }
+                .green{
+                    background-color: variables.$bgc-34;
+                }
+                .remark{
+                    font-size: 16px;
+                    text-align: center;
+                    color: variables.$fc-2;
+                    width: 100%;
+                    margin-top: 20px;
+                }
+            }
+        }
+    }
+    .right{
+        .banner{
+            width: 500px;
+            height: auto;
+        }
+    }
+}

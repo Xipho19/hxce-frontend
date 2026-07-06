@@ -1,0 +1,21 @@
+@use "../../assets/scss/base";
+@use "../../assets/scss/variables";
+.expand-container{
+    width: 800px;
+    padding: 20px;
+}
+.reason{
+    border: solid 1px variables.$bc-19;
+    padding: 10px;
+    width: 1200px;
+    margin: 20px;
+}
+.qrcode{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: -20px;
+}
+.dialog-footer-style{
+    text-align: center;
+}

@@ -1,0 +1,276 @@
+@use 'variables.scss';
+@use 'sass:color';
+
+*,
+*:before,
+*:after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.15;
+    color: #303133;
+    background-color: #fff;
+}
+
+a {
+    color: color.mix(#fff, variables.$color-primary, 20%);
+    text-decoration: none;
+
+    &:focus,
+    &:hover {
+        color: variables.$color-primary;
+        text-decoration: underline;
+    }
+}
+
+img {
+    vertical-align: middle;
+}
+
+.el-upload {
+    .el-icon {
+        margin-top: 1px !important;
+    }
+}
+
+/* Utils
+------------------------------ */
+.clearfix:before,
+.clearfix:after {
+    content: ' ';
+    display: table;
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+/* Animation
+------------------------------ */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s;
+}
+
+.fade-enter,
+.fade-leave-to {
+    opacity: 0;
+}
+
+//.el-table__expand-icon {
+//    display: inline-block;
+//    width: 14px;
+//    vertical-align: middle;
+//    margin-right: 5px;
+//}
+//
+//.tableBox {
+//    th {
+//        padding: 0 !important;
+//        height: 30px;
+//        line-height: 30;
+//    }
+//
+//    td {
+//        padding: 0 !important;
+//        height: 30px;
+//        line-height: 30;
+//    }
+//
+//    .cell {
+//        padding: 0 !important;
+//        height: 30px;
+//        line-height: 30px !important;
+//    }
+//}
+//
+.el-form-item {
+    margin-bottom: 18px !important;
+    margin-right: 0 !important;
+
+    .search-input {
+        width: 180px !important;
+        margin-right: 15px !important;
+    }
+
+    .search-input-daterange {
+        width: 233px !important;
+        margin-right: 15px !important;
+    }
+
+    .dialog-input {
+        width: 160px;
+    }
+
+    .dialog-input-description {
+        margin-left: 15px;
+        font-size: 12px;
+        color: variables.$fc-3;
+    }
+
+}
+
+.el-dialog {
+    padding: 25px !important;
+
+    .el-dialog__body {
+        padding: 5px 0 !important;
+
+        .tip {
+            margin-bottom: 20px;
+        }
+    }
+
+    .el-dialog__footer {
+        padding-top: 0 !important;
+    }
+}
+
+.el-tabs__item {
+    user-select: none;
+    padding: 0 10px;
+}
+
+.el-form {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.el-tag {
+    margin-right: 10px;
+}
+
+.inner-item {
+    margin-bottom: 0 !important;
+}
+
+
+.el-empty {
+    padding: 0px 0 !important;
+}
+
+.el-empty__description {
+    margin-top: 8px !important;
+
+    p {
+        font-size: 13px !important;
+    }
+}
+
+.el-transfer-panel {
+    width: 250px !important;
+}
+
+
+.el-table {
+    .el-table__cell {
+        padding: 10px 0 !important;
+
+        .el-button {
+            padding: 0 !important;
+        }
+
+        .is-disabled {
+            color: variables.$fc-16 !important;
+        }
+    }
+
+    .el-table__expanded-cell {
+        padding: 0 !important;
+    }
+}
+
+//消除表格内部出现的垂直滚动条
+.el-table__body-wrapper tr td.el-table-fixed-column--left.is-first-column::before,
+.el-table__body-wrapper tr td.el-table-fixed-column--left.is-last-column::before,
+.el-table__body-wrapper tr td.el-table-fixed-column--right.is-first-column::before,
+.el-table__body-wrapper tr td.el-table-fixed-column--right.is-last-column::before,
+.el-table__body-wrapper tr th.el-table-fixed-column--left.is-first-column::before,
+.el-table__body-wrapper tr th.el-table-fixed-column--left.is-last-column::before,
+.el-table__body-wrapper tr th.el-table-fixed-column--right.is-first-column::before,
+.el-table__body-wrapper tr th.el-table-fixed-column--right.is-last-column::before,
+.el-table__footer-wrapper tr td.el-table-fixed-column--left.is-first-column::before,
+.el-table__footer-wrapper tr td.el-table-fixed-column--left.is-last-column::before,
+.el-table__footer-wrapper tr td.el-table-fixed-column--right.is-first-column::before,
+.el-table__footer-wrapper tr td.el-table-fixed-column--right.is-last-column::before,
+.el-table__footer-wrapper tr th.el-table-fixed-column--left.is-first-column::before,
+.el-table__footer-wrapper tr th.el-table-fixed-column--left.is-last-column::before,
+.el-table__footer-wrapper tr th.el-table-fixed-column--right.is-first-column::before,
+.el-table__footer-wrapper tr th.el-table-fixed-column--right.is-last-column::before,
+.el-table__header-wrapper tr td.el-table-fixed-column--left.is-first-column::before,
+.el-table__header-wrapper tr td.el-table-fixed-column--left.is-last-column::before,
+.el-table__header-wrapper tr td.el-table-fixed-column--right.is-first-column::before,
+.el-table__header-wrapper tr td.el-table-fixed-column--right.is-last-column::before,
+.el-table__header-wrapper tr th.el-table-fixed-column--left.is-first-column::before,
+.el-table__header-wrapper tr th.el-table-fixed-column--left.is-last-column::before,
+.el-table__header-wrapper tr th.el-table-fixed-column--right.is-first-column::before,
+.el-table__header-wrapper tr th.el-table-fixed-column--right.is-last-column::before {
+    bottom: 0 !important;
+}
+
+//调整表格单元格的位移模式，防止出现表格内部图片预览时遮罩不能盖住单元格内容
+.el-table .el-table__cell {
+    position: static !important;
+}
+
+.mode {
+    float: right;
+    margin-right: 0 !important;
+}
+
+.user-list-container {
+    padding: 20px 30px 0 30px;
+    cursor: default;
+    user-select: none;
+
+    .user-list {
+        list-style: none;
+        padding: 0;
+
+        overflow: hidden;
+        margin: 0 -20px 0 0;
+
+        .user-item {
+            float: left;
+            width: 45px;
+            margin-right: 20px;
+
+            .user-name {
+                display: block;
+                width: 45px;
+                text-align: center;
+                margin-top: 5px;
+                font-size: 12px;
+                margin-bottom: 15px;
+            }
+        }
+    }
+
+    .empty {
+        margin-bottom: 25px;
+        width: 100px;
+    }
+}
+
+.el-alert {
+    padding-top: 12px !important;
+    padding-bottom: 14px !important;
+
+    .el-alert__description {
+        line-height: 1.6;
+        font-size: 13px !important;
+    }
+}
+
+.el-pagination{
+    position: relative;
+    z-index: 10;
+}
+
+.el-transfer-panel{
+    width: 210px !important;
+
+}

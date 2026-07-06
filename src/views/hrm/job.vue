@@ -1,0 +1,439 @@
+<template>
+    <div id="job" v-if="proxy.isAuth(['ROOT','JOB:SELECT'])">
+        <el-form :inline="true" :model="formData" :rules="rule" ref="form">
+            <el-form-item prop="name">
+                <el-input v-model="formData.name" placeholder="职位名称" maxlength="50" class="search-input"
+                          clearable="clearable"/>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" icon="Search" @click="searchByCondition()">查询</el-button>
+                <el-button type="primary" icon="Plus" :disabled="!proxy.isAuth(['ROOT','JOB:INSERT'])"
+                           @click="showDialog()">
+                    新增
+                </el-button>
+                <el-button type="danger" icon="Delete" :disabled="!proxy.isAuth(['ROOT','JOB:DELETE'])"
+                           @click="deleteTableRows()">
+                    批量删除
+                </el-button>
+            </el-form-item>
+            <el-form-item class="mode">
+                <el-radio-group v-model="formData.statusLabel" @change="searchByCondition()">
+                    <el-radio-button value="全部">全部</el-radio-button>
+                    <el-radio-button value="正常">正常</el-radio-button>
+                    <el-radio-button value="停用">停用</el-radio-button>
+                    https://mbd.baidu.com/newspage/data/dtlandingsuper?nid=dt_3899890714497029503
+                </el-radio-group>
+            </el-form-item>
+        </el-form>
+        <el-table :data="tableData.dataList" :header-cell-style="{'background':'#f5f7fa','padding':'10px 0 !important'}"
+                  v-loading="tableData.loading" :scrollbar-always-on="false" @selection-change="selectionChange"
+                  @expand-change="expand" :row-key="tableData.getRowKeys" :expand-row-keys="tableData.expands" border>
+            <el-table-column type="expand">
+                <template #default="scope">
+                    <div class="user-list-container">
+                        <ul class="user-list" v-if="scope.row.userList && scope.row.userList.length>0">
+                            <li v-for="one in scope.row.userList" :key="one.id">
+                                <el-tooltip effect="dark" :content="one.name" placement="top-start"
+                                            v-if="one.name.length>3">
+                                    <div class="user-item">
+                                        <div class="user-avatar">
+                                            <el-avatar shape="square" :size="45" :src="one.photo">
+                                                <img src="../../assets/ogm/pic.png" alt="用户头像"/>
+                                            </el-avatar>
+                                        </div>
+                                        <el-text class="user-name" truncated>{{ one.name }}</el-text>
+                                    </div>
+                                </el-tooltip>
+                                <div class="user-item" v-else>
+                                    <div class="user-avatar">
+                                        <el-avatar shape="square" :size="45" :src="one.photo">
+                                            <img src="../../assets/ogm/pic.png" alt="用户头像"/>
+                                        </el-avatar>
+                                    </div>
+                                    <el-text class="user-name" truncated>{{ one.name }}</el-text>
+                                </div>
+                            </li>
+                        </ul>
+                        <el-empty :image-size="50" description="暂无在职用户" class="empty" v-else/>
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column type="selection" :selectable="selectable" header-align="center" align="center" width="50"/>
+            <el-table-column type="index" header-align="center" align="center" width="120" label="序号">
+                <template #default="scope">
+                    <span>{{ (tableData.pageIndex - 1) * tableData.pageSize + scope.$index + 1 }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="name" header-align="center" align="center" label="职位名称" min-width="200"
+                             show-overflow-tooltip/>
+            <el-table-column prop="level" header-align="center" align="center" label="职位级别" min-width="180"
+                             show-overflow-tooltip/>
+            <el-table-column header-align="center" align="center" label="关联用户" min-width="180"
+                             show-overflow-tooltip>
+                <template #default="scope">
+                    <span>{{ scope.row.userCount }}人</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="remark" header-align="center" align="center" label="备注信息" min-width="300"
+                             show-overflow-tooltip/>
+            <el-table-column prop="systemic" header-align="center" align="center" label="系统职位" min-width="150"
+                             show-overflow-tooltip/>
+            <el-table-column prop="status" header-align="center" align="center" label="状态" min-width="150"/>
+            <el-table-column fixed="right" header-align="center" align="center" width="150" label="操作">
+                <template #default="scope">
+                    <el-button type="primary" :disabled="!proxy.isAuth(['ROOT','JOB:UPDATE'])"
+                               @click="showDialog(scope.row.id)" link>
+                        修改
+                    </el-button>
+                    <el-button type="primary"
+                               :disabled="!proxy.isAuth(['ROOT','JOB:DELETE'])||scope.row.userCount>0||scope.row.systemic=='是'"
+                               @click="deleteTableRows(scope.row.id)" link>
+                        删除
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination @size-change="pageSizeChange" @current-change="pageIndexChange"
+                       :current-page="tableData.pageIndex" :page-sizes="[10, 20, 50]" :page-size="tableData.pageSize"
+                       :total="tableData.totalCount" layout="total, sizes, prev, pager, next, jumper">
+        </el-pagination>
+        <el-dialog :title="dialog.formData.id? '编辑职位' : '新增职位'" v-model="dialog.visible" width="450"
+                   :close-on-click-modal="false" v-if="proxy.isAuth(['ROOT','JOB:INSERT','JOB:UPDATE'])">
+            <el-form ref="dialogForm" :model="dialog.formData" :rules="dialog.rule" label-width="80px">
+                <el-form-item label="职位名称" prop="name">
+                    <el-input v-model="dialog.formData.name" placeholder="职位名称" maxlength="50"
+                              :disabled="dialog.formData.systemic"/>
+                </el-form-item>
+                <el-form-item label="备注信息">
+                    <el-input type="textarea" v-model="dialog.formData.remark" placeholder="备注信息" :rows="3"
+                              maxlength="200"/>
+                </el-form-item>
+                <el-form-item label="职位级别" prop="level">
+                    <el-select v-model="dialog.formData.level" placeholder="请选择职级"
+                               :disabled="dialog.formData.systemic">
+                        <el-option label="基层员工" value="1"></el-option>
+                        <el-option label="基层领导" value="2"></el-option>
+                        <el-option label="中层领导" value="3"></el-option>
+                        <el-option label="高层领导" value="4"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="职位状态" prop="status">
+                    <el-radio-group v-model="dialog.formData.status">
+                        <el-radio value="正常">正常</el-radio>
+                        <el-radio value="停用">停用</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="dialog.visible = false">取消</el-button>
+                    <el-button type="primary" @click="saveSubmit()">保存</el-button>
+                </span>
+            </template>
+        </el-dialog>
+    </div>
+</template>
+
+<script setup lang="ts">
+import {reactive, getCurrentInstance, ref} from 'vue';
+import {Search, Plus, Delete} from "@element-plus/icons-vue";
+
+const {proxy} = getCurrentInstance();
+
+/** 响应对象区域 *********************************************************/
+
+const formData = reactive({
+    name: null,
+    statusLabel: '全部',
+    status: null
+});
+
+const rule = reactive({
+    name: [
+        {pattern: '^[a-zA-Z0-9\u4e00-\u9fa5_\-]{1,50}$', message: '职位名称格式错误', trigger: 'blur'}
+    ]
+})
+
+const tableData = reactive({
+    dataList: [],
+    pageIndex: 1,
+    pageSize: 10,
+    totalCount: 0,
+    loading: false,
+    selections: [],
+    expands: [],
+    getRowKeys(row) {
+        return row.id;
+    }
+});
+
+const dialog = reactive({
+    visible: false,
+    formData: {
+        id: null,
+        name: null,
+        level: null,
+        remark: null,
+        systemic: null,
+        status: "正常"
+    },
+    rule: {
+        name: [
+            {required: true, message: "请输入职位名称"},
+            {min: 2, max: 50, message: '长度在2到50个字符之间', trigger: 'blur'},
+            {pattern: '^[a-zA-Z0-9\u4e00-\u9fa5_\-]{2,50}$', message: '部门名称格式错误', trigger: 'blur'},
+            {
+                validator: (rule, value, callback) => {
+                    const data = {
+                        id: dialog.formData.id,
+                        name: value
+                    }
+                    proxy.$http("/mis/job/check-name-conflict", "POST", data, true, resp => {
+                        let result = resp.result;
+                        if (result.status == "SUCCESS") {
+                            if (result.isConflict === false) {
+                                callback();
+                            }
+                            else {
+                                callback(new Error('职位名称已存在'));
+                            }
+                        }
+                    })
+                },
+                trigger: 'blur'
+            }
+        ],
+        level: [
+            {required: true, message: "请选择职位级别"}
+        ],
+        status: [
+            {required: true, message: "请选择职位状态"}
+        ]
+    }
+});
+
+/** 函数定义区域 *********************************************************/
+function loadTableData() {
+    tableData.loading = true;
+    tableData.expands = [];
+    let temp = {
+        "全部": null,
+        "正常": 1,
+        "停用": 2
+    }
+    const data = {
+        name: formData.name,
+        status: temp[formData.statusLabel],
+        page: tableData.pageIndex,
+        length: tableData.pageSize
+    }
+    proxy.$http("/mis/job/search-by-page", "POST", data, true, resp => {
+        let result = resp.result;
+        if (result.status == "SUCCESS") {
+            let page = result.page;
+            let list = page.list;
+            let tempStatus = {
+                "1": "正常",
+                "2": "停用"
+            }
+            let tempLevel = {
+                "1": "基层员工",
+                "2": "基层领导",
+                "3": "中层领导",
+                "4": "高层领导"
+            }
+            let tempSystemic = {
+                "true": "是",
+                "false": "否"
+            }
+            list.forEach(one => {
+                one.status = tempStatus[one.status];
+                one.level = tempLevel[one.level];
+                one.systemic = tempSystemic[one.systemic];
+            });
+            tableData.dataList = list;
+
+            tableData.totalCount = Number(page.totalCount);
+            tableData.loading = false;
+        }
+
+    })
+}
+
+loadTableData();
+
+function pageSizeChange(size) {
+    tableData.pageSize = size;
+    tableData.pageIndex = 1;
+    loadTableData();
+}
+
+function pageIndexChange(index) {
+    tableData.pageIndex = index;
+    loadTableData();
+}
+
+function searchByCondition() {
+    proxy.$refs.form.validate((valid) => {
+        if (valid) {
+            tableData.pageIndex = 1;
+            loadTableData();
+        }
+    })
+}
+
+
+function selectable(row, index) {
+    if (row.userCount == 0 && row.systemic == '否') {
+        return true;
+    }
+    return false;
+}
+
+function selectionChange(selection) {
+    tableData.selections = selection;
+}
+
+function showDialog(id) {
+    dialog.formData.id = (id) ? id : null;
+    dialog.formData.systemic = false;
+    dialog.visible = true;
+    proxy.$nextTick(() => {
+        proxy.$refs.dialogForm.resetFields();
+        dialog.formData.remark = null;
+        if (id) {
+            const data = {
+                id: id
+            }
+            proxy.$http("/mis/job/search-by-id", "POST", data, true, resp => {
+                let result = resp.result;
+                if (result.status == "SUCCESS") {
+                    const temp = {
+                        "1": "正常",
+                        "2": "停用"
+                    }
+                    result.job.status = temp[result.job.status];
+                    dialog.formData.name = result.job.name;
+                    dialog.formData.level = result.job.level;
+                    dialog.formData.remark = result.job.remark;
+                    dialog.formData.systemic = result.job.systemic;
+                    dialog.formData.status = result.job.status;
+                }
+            })
+        }
+    });
+}
+
+function saveSubmit() {
+    proxy.$refs.dialogForm.validate((valid) => {
+        if (valid) {
+            let temp = {
+                "正常": 1,
+                "停用": 2
+            }
+            const data = {
+                id: dialog.formData.id,
+                name: dialog.formData.name,
+                level: dialog.formData.level,
+                remark: dialog.formData.remark,
+                status: temp[dialog.formData.status]
+            }
+
+            let url = null
+            if (dialog.formData.id && dialog.formData.systemic) {
+                url = "/mis/job/updateSystemicJob"
+            }
+            else if (dialog.formData.id && !dialog.formData.systemic) {
+                url = "/mis/job/updateNotSystemicJob"
+            }
+            else {
+                url = "/mis/job/insert"
+            }
+
+            proxy.$http(url, "POST", data, true, resp => {
+                let result = resp.result;
+                if (result.status == "SUCCESS") {
+                    proxy.$message({
+                        type: 'success',
+                        message: '保存成功',
+                        duration: 1200,
+                        onClose: () => {
+                            dialog.visible = false;
+                            loadTableData();
+                        }
+                    });
+                }
+            })
+        }
+    })
+}
+
+function deleteTableRows(id) {
+    let ids = id ? [id] : tableData.selections.map(one => one.id);
+    if (ids.length === 0) {
+        proxy.$message({
+            type: 'warning',
+            message: '请选择要删除的记录',
+            duration: 1200
+        })
+        return
+    }
+    proxy.$confirm('确认删除选中的记录吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(() => {
+        const data = {
+            "ids": ids
+        }
+        proxy.$http("/mis/job/delete-by-ids", "POST", data, true, resp => {
+            let result = resp.result;
+            if (result.status === "SUCCESS") {
+                proxy.$message({
+                    message: '删除成功',
+                    type: 'success',
+                    duration: 1200,
+                    onClose: () => {
+                        loadTableData();
+                    }
+                });
+            }
+            else {
+                proxy.$message({
+                    type: 'error',
+                    message: '删除失败',
+                    duration: 1200
+                })
+            }
+        })
+    })
+}
+
+function expand(row, expandedRows) {
+    if (expandedRows.length > 0) {
+        tableData.expands = [];
+        let data = {
+            jobId: row.id,
+            statuses: [1, 2]
+        };
+        proxy.$http('/mis/user/search-user-associated-job', 'POST', data, false, function (resp) {
+            let result = resp.result;
+            if (result.status === "SUCCESS") {
+                result.userList.forEach(one => {
+                    if (one.photo) {
+                        one.photo = one.photo ? proxy.$minioUrl + one.photo : "../../assets/ogm/pic.png"
+                    }
+                });
+                row.userList = result.userList;
+                tableData.expands.push(row.id);
+            }
+        });
+    }
+    else {
+        tableData.expands = [];
+    }
+}
+
+</script>
+<style scoped lang="scss">
+</style>

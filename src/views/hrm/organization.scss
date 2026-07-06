@@ -1,0 +1,20 @@
+@use "../../assets/scss/base";
+@use "../../assets/scss/variables";
+
+.step-container {
+    margin-top: 20px;
+    margin-bottom: 30px;
+    margin-left: -20px;
+    width: 480px;
+}
+
+.step-content {
+    .step-content-tip {
+        background-color: variables.$bgc-35;
+        color: variables.$fc-36;
+        line-height: 1.7;
+        padding: 10px 15px;
+        margin-bottom: 20px;
+        border-radius: 3px;
+    }
+}

@@ -1,0 +1,262 @@
+@use "../../assets/scss/base";
+@use "../../assets/scss/variables";
+
+.expand-content {
+    margin: 20px 25px 30px 25px;
+    user-select: none;
+
+    .custom-tabs-label {
+        .el-icon {
+            vertical-align: -3px;
+        }
+    }
+
+    .request-funds-container {
+        width: 850px;
+        margin-top: 15px;
+
+        .request-funds-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px 10px 10px;
+
+            .left {
+                display: flex;
+
+                .desc {
+                    font-size: 13px;
+                    letter-spacing: 1px;
+                    writing-mode: vertical-rl; /* 文字从上到下，从右到左排列 */
+
+                    &:first-of-type {
+                        margin-right: 5px;
+                    }
+
+                    &:last-of-type {
+                        margin-left: 5px;
+                    }
+                }
+            }
+
+            .request-funds-title {
+                cursor: pointer;
+                position: absolute;
+                left: 372px;
+                height: 60px;
+                margin: 0;
+                padding: 15px 15px 0 15px;
+                font-size: 24px;
+                letter-spacing: 1px;
+                border-bottom: double 6px variables.$bc-19;
+            }
+        }
+
+        .request-funds-footer {
+            display: flex;
+            justify-content: space-between;
+            list-style: none;
+            margin: 0;
+            padding: 15px 0 0 0;
+
+            li {
+                width: 22%;
+                display: flex;
+
+                span {
+                    display: block;
+                    flex-grow: 1;
+                    border-bottom: solid 1px variables.$bc-19;
+                    text-align: center;
+                }
+
+            }
+        }
+
+        .request-funds-table {
+            border: solid 2px variables.$bc-19;
+            border-spacing: 0;
+            width: 100%;
+            margin-bottom: 20px;
+
+            td, th {
+                border-top: solid 1px variables.$bc-19;
+                border-left: solid 1px variables.$bc-19;
+                padding: 0 10px;
+                text-align: center;
+                height: 40px;
+            }
+
+            th {
+                background-color: variables.$bgc-36;
+                width: 115px;
+
+                &:first-child {
+                    border-left: none;
+                }
+            }
+
+            tr:first-of-type {
+                td, th {
+                    border-top: none;
+                }
+            }
+
+            td {
+                &:first-child {
+                    border-left: none;
+                }
+            }
+
+            .left {
+                text-align: left;
+            }
+
+            .reason {
+                height: 136px;
+                line-height: 1.6;
+                display: flex;
+                align-items: center;
+            }
+
+            .checkbox {
+                margin-right: 20px;
+
+                &:last-of-type {
+                    margin-right: 0;
+                }
+
+                &:before {
+                    content: "";
+                    display: inline-block;
+                    width: 16px;
+                    height: 16px;
+                    border: 1px solid variables.$bc-19;
+                    //background-color: variables.$bgc-19;
+                    margin-right: 7px;
+                    vertical-align: -3px;
+                }
+            }
+
+            .rowspan-top {
+                border-top: solid 1px variables.$bc-19;
+                border-left: solid 1px variables.$bc-19;
+
+                .label {
+                    text-align: center !important;
+                    position: relative;
+                    top: 50%;
+                    border: none !important;
+                }
+            }
+
+            .rowspan-bottom {
+                border-top: none !important;
+                border-left: solid 1px variables.$bc-19;
+            }
+        }
+
+    }
+
+    .bpmn-container {
+        .el-image {
+
+            .image-slot {
+                width: 400px;
+                height: 300px;
+                background-color: variables.$bgc-36;
+                text-align: center;
+                overflow: hidden;
+
+                .image-slot-icon {
+                    margin-top: 90px;
+                }
+
+                .image-slot-error {
+                    margin-top: 8px;
+                }
+            }
+        }
+    }
+
+    .approval-container {
+        .approval-table {
+            width: 100%;
+            margin-top: 30px;
+            border-spacing: 0;
+            border-collapse: collapse;
+            border: solid 1px variables.$bc-19;
+
+            th {
+                width: 110px;
+                border: solid 1px variables.$bc-19;
+                padding: 8px;
+                text-align: center;
+                background-color: variables.$bgc-36;
+                line-height: 1.7;
+
+                &:nth-child(1) {
+                    min-width: 50px;
+                }
+
+                &:nth-child(2) {
+                    min-width: 180px;
+                }
+
+                &:nth-child(3) {
+                    min-width: 180px;
+                }
+
+                &:nth-child(4) {
+                    min-width: 180px;
+                }
+
+                &:nth-child(5) {
+                    min-width: 180px;
+                }
+
+                &:nth-child(6) {
+                    min-width: 130px;
+                }
+
+                &:nth-child(7) {
+                    min-width: 300px;
+                    text-align: center;
+                }
+
+                &:nth-child(8) {
+                    min-width: 180px;
+                }
+            }
+
+            td {
+                width: 110px;
+                border: solid 1px variables.$bc-19;
+                padding: 8px;
+                text-align: center;
+                line-height: 1.7;
+
+                &:nth-child(6) {
+                    text-align: center;
+                    //审批意见文字不换行的时候居中对齐，换行了就左对齐
+                    .comment {
+                        display: inline-block;
+                        text-align: left;
+                        word-break: break-all;
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+
+.upload {
+    margin-top: 20px;
+}
+
+.archive-image-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}

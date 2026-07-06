@@ -1,0 +1,107 @@
+@use "../assets/scss/base.scss";
+@use "../assets/scss/variables.scss";
+
+.login-page {
+    background-image: url('../assets/login/bg.jpg');
+    background-size: cover;
+    height: 100%;
+    display: flex;
+    align-items: center;
+
+    .panel {
+        display: flex;
+        width: 35%;
+        min-width: 880px;
+        margin-left: auto;
+        margin-right: auto;
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 50px 50px 35px 50px;
+
+        .left {
+            width: 50%;
+            box-sizing: border-box;
+
+            .logo {
+                width: 75%;
+                display: block;
+                margin-bottom: 25px;
+            }
+
+            .big {
+                width: 78%;
+                display: block;
+                height: auto;
+            }
+        }
+
+        .right {
+            width: 50%;
+
+            .title-container {
+                display: flex;
+                margin-top: 10px;
+                margin-bottom: 30px;
+
+                h2 {
+                    font-size: 30px;
+                    color: variables.$color-primary;
+                    margin: 0;
+
+                    em {
+                        color: variables.$fc-15;
+                        font-style: normal;
+                    }
+                }
+
+            }
+
+            .row {
+                margin-bottom: 23px;
+                text-align: center;
+                display: flex;
+
+                .receive-btn {
+                    margin-left: 10px;
+                }
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .link {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                font-size: 14px;
+                color: variables.$fc-8;
+                cursor: pointer;
+                user-select: none;
+            }
+
+            .qrCode-container {
+                display: flex;
+                margin-bottom: 30px;
+
+                .ercode {
+                    margin-right: 0px;
+                }
+            }
+        }
+    }
+}
+
+.reset-password-container {
+    padding: 0px 0px;
+
+    .row {
+        margin-bottom: 23px;
+        text-align: center;
+        display: flex;
+
+        .receive-btn {
+            margin-left: 10px;
+        }
+    }
+}

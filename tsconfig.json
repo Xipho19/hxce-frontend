@@ -1,0 +1,21 @@
+{
+    "files": [],
+    "references": [
+        {
+            "path": "./tsconfig.app.json"
+        },
+        {
+            "path": "./tsconfig.node.json"
+        }
+    ],
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.d.ts",
+        "src/**/*.tsx",
+        "src/**/*.vue"
+    ],
+    "compilerOptions": {
+        //忽略依赖库没有默认导出的问题
+        "allowSyntheticDefaultImports": true
+    }
+}
