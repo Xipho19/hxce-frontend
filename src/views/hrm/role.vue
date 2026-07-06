@@ -1,5 +1,5 @@
 <template>
-    <div id="dept" v-if="proxy.isAuth(['ROOT', 'ROLE:SELECT'])">
+    <div id="role" v-if="proxy.isAuth(['ROOT', 'ROLE:SELECT'])">
         <el-form :inline="true" :model="formData" :rules="rule" ref="form">
             <el-form-item prop="name">
                 <el-input v-model="formData.name" placeholder="角色名称" maxlength="20" class="search-input"
@@ -107,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, getCurrentInstance, ref, inject } from 'vue';
+import { reactive, getCurrentInstance, inject } from 'vue';
 import { useRouter } from 'vue-router';
 import { Search, Plus, Delete } from "@element-plus/icons-vue";
 
@@ -120,12 +120,13 @@ const cachedViews = inject('cachedViews');
 
 const formData = reactive({
     name: null,
-    statusLabel: '全部'
+    statusLabel: '全部',
+    status: null
 });
 
 const rule = reactive({
     name: [
-        { pattern: '^[a-zA-Z0-9\u4e00-\u9fa5_\-]{1,20}$', message: '角色名称格式不正确', trigger: 'blur' }
+        { pattern: '^[a-zA-Z0-9\\u4e00-\\u9fa5_\\-]{1,20}$', message: '角色名称格式不正确', trigger: 'blur' }
     ]
 })
 
@@ -144,6 +145,127 @@ const tableData = reactive({
 
 /** 函数定义区域 *********************************************************/
 
+function loadTableData() {
+    tableData.loading = true
+    tableData.expands = []
+    let temp = {
+        "全部": null,
+        "正常": 1,
+        "停用": 2
+    }
+    formData.status = temp[formData.statusLabel]
+
+    let data = {
+        "name": formData.name,
+        "status": formData.status,
+        "page": tableData.pageIndex,
+        "size": tableData.pageSize
+    }
+
+    proxy.$http("/role/searchByPage", "POST", data, true, function (resp) {
+        let page = resp.data.page
+        tableData.loading = false
+        for (let one of page.list) {
+            let temp = {
+                "1": "正常",
+                "2": "停用"
+            }
+            one.status = temp[one.status]
+        }
+        tableData.dataList = page.list
+        tableData.totalCount = Number(page.totalCount)
+    })
+}
+
+loadTableData()
+
+function pageSizeChange(size) {
+    tableData.pageIndex = 1
+    tableData.pageSize = size
+    loadTableData()
+}
+
+function pageIndexChange(index) {
+    tableData.pageIndex = index
+    loadTableData()
+}
+
+function searchByCondition() {
+    proxy.$refs.form.validate(function (valid) {
+        if (valid) {
+            tableData.pageIndex = 1
+            loadTableData()
+        }
+    })
+}
+
+function expand(row, expandRows) {
+    let roleId = row.id
+    let data = {
+        "roleId": roleId
+    }
+    proxy.$http("/role/searchRoleUsers", "POST", data, true, function (resp) {
+        let userList = resp.data.userList
+        row.userList = userList
+    })
+}
+
+function showDetailPage() {
+    router.push({
+        name: '/mis/hrm/role-detail'
+    })
+}
+
+function showJobDetailPage(id) {
+    router.push({
+        name: '/mis/hrm/role-detail',
+        query: { id: id }
+    })
+}
+
+function selectionChange(selection) {
+    tableData.selections = selection
+}
+
+function selectable(row) {
+    return row.userCount === 0
+}
+
+function deleteTableRows(id) {
+    let ids = null
+    if (id) {
+        ids = [id]
+    }
+    else {
+        ids = tableData.selections.map(one => one.id)
+    }
+    if (ids.length === 0) {
+        proxy.$message({
+            type: 'warning',
+            message: '请选择要删除的记录',
+            duration: 1200
+        })
+    }
+    proxy.$confirm("确认删除选中记录？", "提示", {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning'
+    }).then(function () {
+        let data = {
+            "ids": ids
+        }
+        proxy.$http("/role/deleteByIds", "POST", data, true, function (resp) {
+            proxy.$message({
+                message: '删除成功',
+                type: 'success',
+                duration: 1200,
+                onclose: () => {
+                    loadTableData();
+                }
+            })
+        })
+    })
+}
 </script>
 
 <style scoped lang="scss"></style>

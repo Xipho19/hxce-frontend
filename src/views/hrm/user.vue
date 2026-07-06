@@ -41,7 +41,7 @@
                     <div class="user-info-container">
                         <div class="left">
                             <el-avatar shape="square" :size="118" :src="scope.row.photo">
-                                < img src="../../assets/ogm/pic.png" alt="用户头像" />
+                                <img src="../../assets/ogm/pic.png" alt="用户头像" />
                             </el-avatar>
                         </div>
                         <div class="right">

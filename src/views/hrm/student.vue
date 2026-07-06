@@ -1,5 +1,5 @@
 <template>
-    <div id="user" v-if="proxy.isAuth(['ROOT', 'USER:SELECT'])">
+    <div id="student" v-if="proxy.isAuth(['ROOT', 'STUDENT:SELECT'])">
         <el-form :inline="true" :model="formData" :rules="rule" ref="form">
             <el-form-item prop="name">
                 <el-input v-model="formData.name" placeholder="姓名" maxlength="20" class="search-input"
@@ -25,7 +25,7 @@
                     <el-radio-button value="全部">全部</el-radio-button>
                     <el-radio-button value="正常">正常</el-radio-button>
                     <el-radio-button value="冻结">冻结</el-radio-button>
-                    <el-radio-button value="离职">离职</el-radio-button>
+                    <el-radio-button value="注销">注销</el-radio-button>
                 </el-radio-group>
             </el-form-item>
         </el-form>
@@ -166,7 +166,7 @@ const dialog = reactive({
                         id: dialog.formData.id,
                         phone: value
                     }
-                    proxy.$http("/student/checkPhoneConflict", "POST", data, true, resp => {
+                    proxy.$http("/student/existsByPhone", "POST", data, true, resp => {
                         let data = resp.data;
                         if (data.isConflict === false) {
                             callback();
@@ -193,12 +193,167 @@ const dialog = reactive({
 
 /** 函数定义区域 *********************************************************/
 
+function loadTableData() {
+    tableData.loading = true
+    let temp = {
+        "全部": null,
+        "正常": 1,
+        "冻结": 2,
+        "注销": 3
+    }
+    formData.status = temp[formData.statusLabel]
 
+    let data = {
+        "name": formData.name,
+        "phone": formData.phone,
+        "status": formData.status,
+        "page": tableData.pageIndex,
+        "size": tableData.pageSize
+    }
 
+    proxy.$http("/student/searchByPage", "POST", data, true, function (resp) {
+        let page = resp.data.page
+        tableData.loading = false
+        for (let one of page.list) {
+            let temp = {
+                "1": "正常",
+                "2": "冻结",
+                "3": "注销"
+            }
+            one.status = temp[one.status]
+        }
+        tableData.dataList = page.list
+        tableData.totalCount = Number(page.totalCount)
+    })
+}
+
+loadTableData()
+
+function pageSizeChange(size) {
+    tableData.pageIndex = 1
+    tableData.pageSize = size
+    loadTableData()
+}
+function pageIndexChange(index) {
+    tableData.pageIndex = index
+    loadTableData()
+}
+
+function searchByCondition() {
+    proxy.$refs.form.validate(function (valid) {
+        if (valid) {
+            tableData.pageIndex = 1
+            loadTableData()
+        }
+    })
+}
+
+function showDialog(id) {
+    dialog.formData.id = (id) ? id : null
+    dialog.visible = true
+    proxy.$nextTick(function () {
+        proxy.$refs.dialogForm.resetFields()
+        if (id) {
+            let data = {
+                "id": dialog.formData.id
+            }
+            proxy.$http("/student/searchById", "POST", data, true, function (resp) {
+                let data = resp.data
+                let temp = {
+                    "正常": 1,
+                    "冻结": 2,
+                    "注销": 3
+                }
+                data.status = temp[data.status];
+                dialog.formData.name = data.name;
+                dialog.formData.gender = data.gender;
+                dialog.formData.phone = data.phone;
+                dialog.formData.email = data.email;
+                dialog.formData.status = data.status;
+            })
+        }
+    })
+}
+
+function saveSubmit() {
+    proxy.$refs.dialogForm.validate(function (valid) {
+        if (valid) {
+            let temp = {
+                "正常": 1,
+                "冻结": 2,
+                "注销": 3
+            }
+            let data = {
+                "id": dialog.formData.id,
+                "name": dialog.formData.name,
+                "gender": dialog.formData.gender,
+                "phone": dialog.formData.phone,
+                "email": dialog.formData.email,
+                "status": temp[dialog.formData.status]
+            }
+            let url = null
+            if (dialog.formData.id) {
+                url = "/student/update"
+            }
+            else {
+                url = "/student/insert"
+            }
+            proxy.$http(url, "POST", data, true, function (resp) {
+                proxy.$message({
+                    type: 'success',
+                    message: '保存成功',
+                    duration: 1200,
+                    onclose: () => {
+                        dialog.visible = false;
+                        loadTableData();
+                    }
+                });
+            })
+        }
+    })
+}
+
+function selectionChange(selection) {
+    tableData.selections = selection
+}
+
+function deleteTableRows(id) {
+    let ids = null
+    if (id) {
+        ids = [id]
+    }
+    else {
+        ids = tableData.selections.map(one => one.id)
+    }
+    if (ids.length == 0) {
+        proxy.$message({
+            type: 'warning',
+            message: '请选择要删除的记录',
+            duration: 1200
+        })
+    }
+    proxy.$confirm("确认删除选中记录？", "提示", {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'wraning'
+    }).then(function () {
+        let data = {
+            "ids": ids
+        }
+        proxy.$http("/student/deleteByIds", "POST", data, true, function (resp) {
+            proxy.$message({
+                message: '删除成功',
+                type: 'success',
+                duration: 1200,
+                onclose: () => {
+                    loadTableData();
+                }
+            })
+        })
+    })
+}
 
 
 </script>
 
-<style scoped lang="scss">
-@use "student";
-</style>
+<style scoped lang="scss"></style>
