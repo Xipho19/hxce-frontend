@@ -1,5 +1,10 @@
 <template>
     <div id="role-detail" v-if="proxy.isAuth(['ROOT', 'ROLE:INSERT', 'ROLE:UPDATE'])" class="role-detail-container">
+        <div style="padding:10px; background:#f5f7fa; margin:10px;">
+            <h4>调试信息：</h4>
+            <div>权限数据：{{ JSON.stringify(systemicPermission) }}</div>
+            <div>关联用户数据：{{ JSON.stringify(associatedUser) }}</div>
+        </div>
         <div class="left-container">
             <h3 class="container-title">角色信息</h3>
             <el-form ref="roleForm" :model="formData" label-width="80px" :rules="rule">
@@ -58,7 +63,7 @@
                 infinite-scroll-immediate="false">
                 <li class="user-item" v-for="user in associatedUser.list" :key="user.id">
                     <el-avatar shape="square" :icon="UserFilled" :size="20" :src="user.photo"></el-avatar>
-                    <el-text class="user-info" :title="user.name + '(' + user.deptName + '） &#45;&#45; ' + user.status"
+                    <el-text class="user-info" :title="user.name + '&#45;&#45; ' + user.status"
                         truncated>
                         {{ user.name }} &#45;&#45; {{ user.status }}
                     </el-text>
@@ -69,11 +74,12 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, getCurrentInstance, ref, inject, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { reactive, getCurrentInstance, ref, inject, watch, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { UserFilled } from '@element-plus/icons-vue'
 
 const route = useRoute();
+const router = useRouter();
 const { proxy } = getCurrentInstance();
 
 
@@ -98,16 +104,17 @@ watch(siteContentHeight, (newValue, oldValue) => {
 
 
 const formData = reactive({
+    id: null,
     roleName: null,
     remark: null,
     status: "1",
-
+    permissions: []
 });
 
 const rule = reactive({
     roleName: [
         { required: true, message: '请输入角色名称' },
-        { pattern: '^[a-zA-Z0-9\\u4e00-\\u9fa5_\\-]{1,20}\$', message: '角色名称格式不正确' },
+        { pattern: '^[a-zA-Z0-9\\u4e00-\\u9fa5_\\-]{1,20}$', message: '角色名称格式不正确' },
         {
             validator: (rule, value, callback) => {
                 const data = {
@@ -145,6 +152,201 @@ const associatedUser = reactive({
 
 /** 函数定义区域 *********************************************************/
 
+function loadSystemicPermission() {
+    proxy.$http("/permission/searchSystemicPermissions", "GET", null, false, resp => {
+        console.log("权限接口返回：", resp);
+        let data = resp.data;
+        if (data.permissions && data.permissions.length > 0) {
+            // 重置 systemPermission 数组，添加 checked 状态
+            data.permissions.forEach(module => {
+                module.checked = false;
+                if (module.permissions) {
+                    module.permissions.forEach(permission => {
+                        permission.checked = false;
+                        permission.name = permission.permissionName || permission.name;
+                    });
+                }
+            });
+            // 更新 reactive 数组
+            systemicPermission.length = 0;
+            data.permissions.forEach(module => {
+                systemicPermission.push(module);
+            });
+            
+            // 如果是编辑模式，重新设置权限选中状态
+            if (formData.id && formData.permissions.length > 0) {
+                updatePermissionCheckState();
+            }
+        }
+    });
+}
+
+function updatePermissionCheckState() {
+    systemicPermission.forEach(module => {
+        if (module.permissions) {
+            module.permissions.forEach(perm => {
+                perm.checked = formData.permissions.includes(perm.id);
+            });
+            module.checked = module.permissions.every(p => p.checked);
+        }
+    });
+}
+
+function loadAssociatedUser() {
+    if (!queryParams.id) {
+        return;
+    }
+    const data = {
+        id: queryParams.id
+    }
+    proxy.$http("/role/searchRoleUsers", "POST", data, false, resp => {
+        console.log("关联用户接口返回：", resp);
+        let data = resp.data;
+        if (data.userList) {
+            associatedUser.list = data.userList;
+            associatedUser.count = data.userList.length;
+        }
+    });
+}
+
+function loadNextPage() {
+    // 无限滚动加载下一页的逻辑
+    // 暂时先留空，因为我们的后端可能没有分页查询角色用户的接口
+}
+
+function saveSubmit() {
+    proxy.$refs.roleForm.validate((valid) => {
+        if (valid) {
+            let url = null;
+            let data = {
+                roleName: formData.roleName,
+                remark: formData.remark,
+                status: formData.status,
+                permissions: formData.permissions
+            };
+            
+            if (formData.id) {
+                url = "/role/update";
+                data.id = formData.id;
+            } else {
+                url = "/role/insert";
+            }
+            
+            proxy.$http(url, "POST", data, false, resp => {
+                proxy.$message({
+                    type: 'success',
+                    message: '保存成功',
+                    duration: 1200,
+                    onclose: () => {
+                        // 保存成功后关闭标签页并返回角色管理页面
+                        if (removeTab) {
+                            removeTab();
+                        }
+                        router.push('/mis/hrm/role');
+                    }
+                });
+            });
+        }
+    });
+}
+
+function resetRoleInfo() {
+    proxy.$refs.roleForm.resetFields();
+    if (formData.id) {
+        // 如果是编辑模式，重新加载原始数据
+        loadRoleInfo();
+    } else {
+        // 如果是新增模式，重置为默认值
+        formData.roleName = null;
+        formData.remark = null;
+        formData.status = "1";
+        formData.permissions = [];
+        // 重置权限选择状态
+        systemicPermission.forEach(module => {
+            module.checked = false;
+            module.permissions.forEach(perm => {
+                perm.checked = false;
+            });
+        });
+    }
+}
+
+function moduleCheckedChange(checked, module) {
+    // 模块全选/取消全选
+    if (module.permissions) {
+        module.permissions.forEach(permission => {
+            permission.checked = checked;
+        });
+    }
+    // 更新 formData.permissions
+    updateSelectedPermissions();
+}
+
+function permissionCheckedChange(checked, permission, module) {
+    // 权限选择变化
+    // 检查模块是否全选
+    if (module.permissions) {
+        const allChecked = module.permissions.every(p => p.checked);
+        module.checked = allChecked;
+    }
+    // 更新 formData.permissions
+    updateSelectedPermissions();
+}
+
+function updateSelectedPermissions() {
+    // 更新选中的权限ID列表
+    formData.permissions = [];
+    systemicPermission.forEach(module => {
+        if (module.permissions) {
+            module.permissions.forEach(permission => {
+                if (permission.checked) {
+                    formData.permissions.push(permission.id);
+                }
+            });
+        }
+    });
+}
+
+function loadRoleInfo() {
+    if (!queryParams.id) {
+        return;
+    }
+    const data = {
+        id: queryParams.id
+    };
+    proxy.$http("/role/searchById", "POST", data, false, resp => {
+        let data = resp.data;
+        if (data) {
+            formData.id = data.id;
+            formData.roleName = data.roleName;
+            formData.remark = data.remark;
+            formData.status = String(data.status);
+            
+            // 解析权限JSON
+            if (data.permissions) {
+                try {
+                    const permissions = JSON.parse(data.permissions);
+                    formData.permissions = permissions;
+                    // 设置权限选中状态
+                    if (systemicPermission.length > 0) {
+                        updatePermissionCheckState();
+                    }
+                } catch (e) {
+                    console.error("解析权限数据失败", e);
+                }
+            }
+        }
+    });
+}
+
+onMounted(() => {
+    // 初始化加载
+    loadSystemicPermission();
+    if (queryParams.id) {
+        loadRoleInfo();
+        loadAssociatedUser();
+    }
+});
 
 </script>
 

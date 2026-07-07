@@ -156,7 +156,7 @@ function loadTableData() {
     formData.status = temp[formData.statusLabel]
 
     let data = {
-        "name": formData.name,
+        "roleName": formData.name,
         "status": formData.status,
         "page": tableData.pageIndex,
         "size": tableData.pageSize
@@ -202,7 +202,7 @@ function searchByCondition() {
 function expand(row, expandRows) {
     let roleId = row.id
     let data = {
-        "roleId": roleId
+        "id": roleId
     }
     proxy.$http("/role/searchRoleUsers", "POST", data, true, function (resp) {
         let userList = resp.data.userList
