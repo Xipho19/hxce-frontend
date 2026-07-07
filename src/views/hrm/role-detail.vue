@@ -1,10 +1,5 @@
 <template>
     <div id="role-detail" v-if="proxy.isAuth(['ROOT', 'ROLE:INSERT', 'ROLE:UPDATE'])" class="role-detail-container">
-        <div style="padding:10px; background:#f5f7fa; margin:10px;">
-            <h4>调试信息：</h4>
-            <div>权限数据：{{ JSON.stringify(systemicPermission) }}</div>
-            <div>关联用户数据：{{ JSON.stringify(associatedUser) }}</div>
-        </div>
         <div class="left-container">
             <h3 class="container-title">角色信息</h3>
             <el-form ref="roleForm" :model="formData" label-width="80px" :rules="rule">
